@@ -1,0 +1,572 @@
+<html> 
+<head> 
+<meta charset="utf-8" />
+<title>Jason</title> 
+<style> 
+	body {margin:0px;} 
+	canvas {width:100%; height:100%} 
+</style>
+</head> 
+<body> 
+
+    
+
+<script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r74/three.min.js"></script>
+<script src="js/orbitControls.js"></script>
+<script src="sj/renderers/Projector.js"></script>
+<script src="loaders/JSONLoader.js"></script>
+<script> 
+console.log(THREE.JSONLoader );
+"use strict"
+/*scene*/
+var scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2( "blue", 0.001 );
+
+/*camera*/
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+
+/*renderer*/
+var renderer = new THREE.WebGLRenderer({antialias:true}); //create canvas
+renderer.setSize(window.innerWidth, window.innerHeight); //set canvas size;
+renderer.setClearColor(new THREE.Color(0x2a2a2a, 1.0));// set rendering background color
+document.body.appendChild(renderer.domElement); // pass in _canvas
+
+// ===================================================================
+var texture = new THREE.TextureLoader().load("images/jupiter.jpg");
+
+// ===================================================================
+
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+var target;
+function onMouseMove( event ) {
+
+	// calculate mouse position in normalized device coordinates
+	// (-1 to +1) for both components
+
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;	
+
+	raycaster.setFromCamera( mouse, camera );	
+	var intersects = raycaster.intersectObjects( scene.children );
+	// console.log(intersects[0]);
+	var target;
+	// console.log(target);
+	// if(intersects.length>0){
+	// 	if(target != intersects[ 0 ].object){
+	// 		target = intersects[ 0 ].object;
+	// 		console.log(target);
+	// 	}
+
+	// 	target.material.color.set( 0xff0000 );
+
+	// 	console.log("yesy");
+	// }else{
+	// 	target.material.color.set( "blue" );
+	// 	target = null;
+	// 	console.log("no");
+		
+	// }
+	
+
+}
+
+// ===================================================================
+// var loader = new THREE.TextureLoader();
+// var focuso = loader.load('earth.jpg');
+// var mat = new THREE.MeshBasicMaterial( {map:focuso, side: THREE.DoubleSide, transparent:true, opacity:0.5} );
+// ===================================================================
+
+/*geometry*/
+var geometry = new THREE.BoxGeometry( 20, 20, 20 );
+var material = new THREE.MeshBasicMaterial( { color: "blue" } );
+var cube = new THREE.Mesh( geometry, material );
+// cube.position.set(0,80,11);
+
+/*skybox*/
+// var skyBoxGeometry = new THREE.BoxGeometry(100000, 100000, 100000);
+// var skyBoxMaterial = new THREE.MeshBasicMaterial({color:"white", side:THREE.BackSide});
+// var skyBox = new THREE.Mesh(skyBoxGeometry, skyBoxMaterial);
+// scene.add(skyBox);
+
+scene.add( cube );
+camera.lookAt(scene.position);
+// camera.position.set(0,0,66);
+camera.position.set(0,0,700);
+
+// ===================================================================
+/*load geo*/
+
+// ===================================================================
+	// mesh
+
+	var tVector =[];
+	var a;
+	var loader = new THREE.JSONLoader();
+	var imm;
+	// load a resource
+	var loader = new THREE.JSONLoader(); 
+	loader.load( 'imm.js', function (geometry, material) { 
+		var material = new THREE.MeshLambertMaterial({color: 0xFFFFFF});
+		imm = new THREE.Mesh(geometry, material);
+		scene.add(imm);
+		console.log(imm.geometry.vertices);
+		for (var i = 0; i < imm.geometry.vertices.length; i++) {
+			tVector.push(imm.geometry.vertices[i]);
+		};
+		// console.log(tVector);
+		a = tVector;
+		// console.log("a: ", a);
+		// imm.rotation.x = -90*Math.PI/180;
+		// renderer.render(scene, camera);
+	});
+	console.log(a);
+	console.log("imm: ", imm);
+
+	console.log(tVector);
+	var geom;
+	var geom2;
+	var geom3;
+	var cloud;
+	var cloud2;
+	var cloud3;
+	var data=[];
+	function createPointCloud(){
+		
+		var texture = new THREE.TextureLoader().load("images/3D.png");
+		geom = new THREE.RingGeometry(333,444,1000);
+		// geom = new THREE.Geometry();
+		var material = new THREE.PointsMaterial({
+			// map: texture,
+			size:3,
+			transparent:true,
+			opacity: 1,
+			blending: THREE.AdditiveBlending,
+			sizeAttenuation:true,
+			color:"black"
+		})
+		// var geomOm;
+		// var geomO = new THREE.SphereGeometry(111,22,22);
+		// for (var i = 0; i < num; i++) {
+		// 	// var particle = new THREE.Vector3(
+		// 	// 	Math.random()*range-range/2,
+		// 	// 	Math.random()*range-range/2,
+		// 	// 	Math.random()*range-range/2
+		// 	// 	);
+		// 	var particle = geom.vertices[i];
+
+		// 	// particle.velocityY = 0.1 + Math.random()/5;
+		// 	// particle.velocityX = (Math.random()-0.5)/3;
+		// 	geomOm.vertices.push(particle);
+		// 	geomOm = new THREE.Points(geom, material);
+			
+		// 	// data.push(particle);
+		// };
+		// 	scene.add(geomOm);
+
+		// var mesh = new THREE.Points(geomO, material);
+		// scene.add(mesh);
+		var num = geom.vertices.length;
+		var range  = 400;
+		for (var i = 0; i < num; i++) {
+			// var particle = new THREE.Vector3(
+			// 	Math.random()*range-range/2,
+			// 	Math.random()*range-range/2,
+			// 	Math.random()*range-range/2
+			// 	);
+			var particle = geom.vertices[i];
+
+			// particle.velocityY = 0.1 + Math.random()/5;
+			// particle.velocityX = (Math.random()-0.5)/3;
+			// geom.vertices.push( new THREE.Vector3(Math.random()*100, Math.random()*1000, Math.random()*100));
+			geom.vertices.push(geom.vertices);
+			
+			// data.push(particle);
+		};
+		cloud = new THREE.Points(geom, material);
+		scene.add(cloud);
+
+		cloud.sortParticles = true;
+	}
+
+	function createAnotherOne(){
+		var texture = new THREE.TextureLoader().load("images/particles.png");
+		geom2 = new THREE.RingGeometry(333,444,333);
+		// geom2 = new THREE.Geometry();
+		var material = new THREE.PointsMaterial({
+			map: texture,
+			size:3,
+			transparent:true,
+			opacity: 1,
+			blending: THREE.AdditiveBlending,
+			sizeAttenuation:true,
+			color:0x6ca6c4
+		})
+		var num = geom2.vertices.length;
+		var range  = 400;
+		for (var i = 0; i < num; i++) {
+			// var particle = new THREE.Vector3(
+			// 	Math.random()*range-range/2,
+			// 	Math.random()*range-range/2,
+			// 	Math.random()*range-range/2
+			// 	);
+			var particle = geom2.vertices[i];
+
+			// particle.velocityY = 0.1 + Math.random()/5;
+			// particle.velocityX = (Math.random()-0.5)/3;
+			// geom2.vertices.push( new THREE.Vector3(Math.random()*100, Math.random()*1000, Math.random()*100));
+			geom2.vertices.push(geom2.vertices);
+			for (var i = 0; i < geom2.vertices.length; i++) {
+				geom2.vertices[i].y+=Math.random()*100;
+				geom2.vertices[i].x+=Math.random()*10;
+				geom2.vertices[i].z+=Math.random()*10;
+			};
+			// data.push(particle);
+		};
+			cloud2 = new THREE.Points(geom2, material);
+			cloud2.position.y -=50;
+			cloud2.name="Jason";
+			scene.add(cloud2);
+			console.log("1!!!!!!!!");
+
+		cloud2.sortParticles = true;
+	}
+	createLight();
+	function createLight(){
+		var directionalLight = new THREE.DirectionalLight( "red", 1);
+		directionalLight.position.set( 0, 1, 0 );
+		scene.add( directionalLight );
+	}
+	function createAnotherTwo(){
+		var texture = new THREE.TextureLoader().load("images/particles.png");
+		geom3 = new THREE.RingGeometry(333,444,333);
+		// geom3 = new THREE.Geometry();
+		var material = new THREE.PointsMaterial({
+			// map: texture,
+			size:3,
+			transparent:true,
+			opacity: 0.7,
+			blending: THREE.AdditiveBlending,
+			// sizeAttenuation:true,
+			color:"white"
+		})
+		var num = geom3.vertices.length;
+		var range  = 400;
+		for (var i = 0; i < num; i++) {
+			// var particle = new THREE.Vector3(
+			// 	Math.random()*range-range/2,
+			// 	Math.random()*range-range/2,
+			// 	Math.random()*range-range/2
+			// 	);
+			var particle = geom3.vertices[i];
+
+			// particle.velocityY = 0.1 + Math.random()/5;
+			// particle.velocityX = (Math.random()-0.5)/3;
+			// geom3.vertices.push( new THREE.Vector3(Math.random()*100, Math.random()*1000, Math.random()*100));
+			geom3.vertices.push(geom3.vertices);
+			for (var i = 0; i < geom3.vertices.length; i++) {
+				geom3.vertices[i].y+=Math.random()*100;
+				geom3.vertices[i].x+=Math.random()*100;
+				geom3.vertices[i].z+=Math.random()*100;
+			};
+			// data.push(particle);
+		};
+			cloud3 = new THREE.Points(geom3, material);
+			cloud3.position.y -=50;
+			cloud3.name="Jason";
+			cloud3.scale.x = 0.8;
+			cloud3.scale.y = 0.8;
+			cloud3.scale.z = 0.8;
+			scene.add(cloud3);
+			console.log("1!!!!!!!!");
+		cloud3.sortParticles = true;
+	}
+	createAnotherTwo();
+	createAnotherOne();
+	createPointCloud()
+// ===================================================================
+/*light*/
+var light = new THREE.PointLight("red");
+light.lookAt(scene.position);
+light.position.set(40,170,222);
+
+scene.add(light);
+// var light = new THREE.AmbientLight( "yellow" ); // soft white light
+// light.scale.x = 100;
+// light.position.set(100,250,100);
+// var light1 = new THREE.AmbientLight( "red" ); // soft white light
+
+// light.lookAt(scene.position);
+
+// scene.add( light );
+// var spotLight  = new THREE.SpotLight(0xffffff);
+// spotLight.lookAt(cube.position);
+// // spotLight.position.set(-40,60,10);
+// spotLight.castShadow = true;
+// scene.add(spotLight);
+/*control*/
+console.log(scene.children);
+var controls = new THREE.OrbitControls(camera, renderer.domElement)
+var points = [];
+for (var i = 0; i < scene.children.length; i++) {
+	if( scene.children[i] instanceof  THREE.Points ){
+		points.push(scene.children[i]);
+	}
+};
+console.log(geom.vertices.length);
+
+// 	geom2.verticesNeedUpdate = true;
+
+var ps = geom.vertices;
+var ps3 = geom2.vertices;
+var time = Date.now()*0.000000001;
+window.addEventListener( 'mousemove', onMouseMove, false );
+window.addEventListener( 'click', onclick, false );
+function onclick(ev){
+	var pageX = ev.pageX;
+	var pageY = ev.pageY;
+	raycaster.setFromCamera( mouse, camera );	
+	var intersects = raycaster.intersectObjects( scene.children[1] );
+	console.log(intersects);
+	if(intersects.length>0){
+			
+				target = intersects[ 0 ].object;
+				console.log(target);
+				
+				target.rotation=0;
+				target.material.map = texture;
+				// target.scale.x +=3;
+				// target.scale.y +=3;
+				// target.scale.z +=3;
+				
+				target.material.needsUpdate = true;
+				console.log("yesy");
+			
+	}else{
+			if(target){
+				target.material.color.set( "blue" );
+				target = null;
+			}
+
+
+	}
+}
+
+console.log(time);
+
+function render() {
+
+			// raycaster.setFromCamera( mouse, camera );	
+
+			// // calculate objects intersecting the picking ray
+			var intersects = raycaster.intersectObjects( scene.children );
+			// console.log(intersects);
+			// for ( var i = 0; i < intersects.length; i++ ) {
+
+			// 	intersects[ i ].object.material.color.set( 0xff0000 );
+			
+			// }
+			
+			// if(intersects.length>0){
+					
+			// 			target = intersects[ 0 ].object;
+			// 			// console.log(target);
+						
+
+			// 			// target.material.color.set( 0xff0000 );
+			// 			target.material.map = texture;
+			// 			// target.scale.x +=0.1;
+			// 			// target.scale.y +=0.1;
+			// 			// target.scale.z +=0.1;
+			// 			console.log("yesy");
+			// 			target.material.needsUpdate = true;
+
+					
+			// }else{
+			// 		if(target){
+			// 			// target.material.color.set( "blue" );
+			// 			// target.scale.x -=0.1;
+			// 			// target.scale.y -=0.1;
+			// 			// target.scale.z -=0.1;
+			// 			if(target.scale.x > 1){
+			// 				target.scale.x -=0.1;
+			// 				target.scale.y -=0.1;
+			// 				target.scale.z -=0.1;
+			// 				// target = null;
+
+			// 			}
+			// 			if(target.scale.x < 1){
+			// 				target = null;
+
+			// 			}
+
+						
+			// 		}
+
+
+			// }
+			// console.log("no");					
+		
+
+		light.position.x += 0.9;
+		var time = Date.now()*0.004;
+		cloud2.rotation.z -= 0.001;
+		cloud3.rotation.z += 0.001;
+		cloud2.scale.x = (Math.sin(time-Math.PI/3)+4.5)/5;
+		cloud2.scale.y = (Math.sin(time-Math.PI/3)+4.5)/5;
+		cloud2.scale.z = (Math.sin(time-Math.PI/3)+4.5)/5;
+		// for (var i = 0; i < ps3.length; i++) {
+
+			
+			
+		// 	if(i%(10)==1){
+		// 		// ps[i].z =100*Math.sin(time-Math.PI/3);
+		// 		ps3[i].x +=5*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}else if(i%(10)==2){
+		// 		ps3[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}else if(i%(10)==3){
+		// 		ps3[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}else if(i%(10)==4){
+		// 		ps3[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}else if(i%(10)==5){
+		// 		ps3[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}else if(i%(10)==6){
+		// 		ps3[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}else if(i%(10)==7){
+		// 		ps3[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}else if(i%(10)==8){
+		// 		ps3[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}else if(i%(10)==9){
+		// 		ps3[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}else if(i%(10)==0){
+		// 		ps3[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 		ps3[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+		// 	}
+			
+
+		// 	// ps[i].y += 10;
+		// 	// ps[i].z +=1;
+		// };
+		for (var i = 0; i < ps.length; i++) {
+
+			
+			
+			if(i%(10)==1){
+				// ps[i].z =100*Math.sin(time-Math.PI/3);
+				ps[i].x +=5*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}else if(i%(10)==2){
+				ps[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}else if(i%(10)==3){
+				ps[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}else if(i%(10)==4){
+				ps[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}else if(i%(10)==5){
+				ps[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}else if(i%(10)==6){
+				ps[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}else if(i%(10)==7){
+				ps[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}else if(i%(10)==8){
+				ps[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}else if(i%(10)==9){
+				ps[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}else if(i%(10)==0){
+				ps[i].x +=Math.random()*7*Math.sin(time-Math.random()*10-Math.PI/3);
+				ps[i].y +=4*Math.sin(time-Math.random()*10-Math.PI/3);
+			}
+			
+
+			// ps[i].y += 10;
+			// ps[i].z +=1;
+		};
+
+		geom.verticesNeedUpdate = true;
+		geom2.verticesNeedUpdate = true;
+		cube.rotation.x+=0.001;
+
+		// var time = Date.now() * 0.00005;
+
+		var time = Date.now()*0.000005
+		// for (var i = 0; i < points.length; i++) {
+			// console.log(time);
+			// console.log(Math.sin(2*time+Math.PI/3));
+			// points[i].position.y =Math.sin(2*time+Math.PI/3);
+			// if(i%10==0){
+			// // 	points[i].position.x-= Math.sin(1)*1;
+			// 	points[i].rotation.x-= 0.1;
+			// }else if(i%9==0){
+			// 		// points[i].position.y+= Math.random()*1;
+			// 		points[i].scale.x =1+Math.random()*2-2/2;
+			// 		points[i].scale.y =1+Math.random()*2-2/2;
+			// 		points[i].scale.z =1+Math.random()*2-2/2;
+			// 	}else if(i%8==0){
+			// 		points[i].position.y= Math.random()*0.2;
+			// 		points[i].scale.x =1+Math.random()*2-2/2;
+			// 		points[i].scale.y =1+Math.random()*2-2/2;
+			// 		points[i].scale.z =1+Math.random()*2-2/2;
+			// 	}else if(i%7==0){
+			// 		points[i].position.y= Math.random()*0.4;
+			// 		points[i].scale.x =1+Math.random()*2-2/2;
+			// 		points[i].scale.y =1+Math.random()*2-2/2;
+			// 		points[i].scale.z =1+Math.random()*2-2/2;
+			// 	}else if(i%6==0){
+			// 		points[i].position.y= Math.random()*0.2;
+			// 		points[i].scale.x =1+Math.random()*2-2/2;
+			// 		points[i].scale.y =1+Math.random()*2-2/2;
+			// 		points[i].scale.z =1+Math.random()*2-2/2;
+			// 	}else{
+			// 		points[i].rotation.x-= 0.1;
+			// 		points[i].rotation.y-= 0.1;
+			// 		points[i].rotation.z-= 0.1;
+			// 	}
+
+
+			
+			
+			// points[i].position.z -= Math.sin(a)*a;
+		// };
+
+		// var object = scene.children[2];
+		// var object3 = scene.children[3];
+		// var object4 = scene.children[4];
+		// var object5 = scene.children[5];
+
+		// object.rotation.y = time * ( 3 < 4 ?3 + 1 : - ( 3 + 1 ) );
+		// object.rotation.y = time * ( 2 < 4 ?2 + 1 : - ( 2 + 1 ) );
+		// object3.position.y +=10*Math.cos(time * ( 2 < 4 ?2 + 1 : - ( 2 + 1 ) ));
+		// object4.rotation.y = time * ( 4 < 4 ?4 + 1 : - ( 4 + 1 ) );
+		// object5.rotation.y = time * ( 5 < 4 ?5 + 1 : - ( 5 + 1 ) );
+		// object5.rotation.x += 1;
+
+
+	// cloud.geometry.groupsNeedUpdate = true;
+	// // particleSystem.geometry.__dirtyVertices = true;
+	// cloud.geometry.lineDistancesNeedUpdate = true;
+	// cloud.geometry.elementsNeedUpdate = true;
+	// cloud.geometry.uvsNeedUpdate = true
+	requestAnimationFrame( render );
+	renderer.render( scene, camera );
+}
+render();
+</script>
+
+
+</body></html>

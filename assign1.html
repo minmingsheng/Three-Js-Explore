@@ -1,0 +1,239 @@
+	<html> 
+	<head> 
+	<meta charset="utf-8" />
+	<title>Jason</title> 
+	<style> 
+		body {margin:0px;} 
+		canvas {width:100%; height:100%} 
+	</style>
+	</head> 
+	<body> 
+
+	    
+
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r74/three.min.js"></script>
+	<script src="js/orbitControls.js"></script>
+	<script src="sj/renderers/Projector.js"></script>
+	<script src="loaders/JSONLoader.js"></script>
+	<script> 
+	console.log(THREE.JSONLoader );
+	"use strict"
+	/*scene*/
+	var scene = new THREE.Scene();
+	scene.fog = new THREE.FogExp2( "blue", 0.001 );
+
+	/*camera*/
+	var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+
+	/*renderer*/
+	var renderer = new THREE.WebGLRenderer({antialias:true}); //create canvas
+	renderer.setSize(window.innerWidth, window.innerHeight); //set canvas size;
+	renderer.setClearColor(new THREE.Color("black", 1.0));// set rendering background color
+	document.body.appendChild(renderer.domElement); // pass in _canvas
+
+	// ===================================================================
+	
+
+	// ===================================================================
+
+	var raycaster = new THREE.Raycaster();
+	var mouse = new THREE.Vector2();
+	var target;
+
+
+	// ===================================================================
+	// =========================textures=========================
+	// ===================================================================
+	var textures = [
+		new THREE.TextureLoader().load("images/points1.png"),
+		new THREE.TextureLoader().load("images/3D.png"),
+		new THREE.TextureLoader().load("images/points.png"),
+		new THREE.TextureLoader().load("images/particles.png"),
+		new THREE.TextureLoader().load("images/jason.png"),
+	]
+	function getTexture(){
+		return textures[Math.floor(Math.random()*(textures.length))]
+	}
+	console.log(getTexture());
+
+
+	/*geometry*/
+	var geometry = new THREE.BoxGeometry( 20, 20, 20 );
+	var material = new THREE.MeshNormalMaterial( { color: "blue" } );
+	var cube = new THREE.Mesh( geometry, material );
+	scene.add( cube );
+	// cube.position.set(0,80,11);
+
+	/*skybox*/
+	// var skyBoxGeometry = new THREE.BoxGeometry(100000, 100000, 100000);
+	// var skyBoxMaterial = new THREE.MeshBasicMaterial({color:"white", side:THREE.BackSide});
+	// var skyBox = new THREE.Mesh(skyBoxGeometry, skyBoxMaterial);
+	// scene.add(skyBox);
+
+
+	camera.lookAt(scene.position);
+	// camera.position.set(0,0,66);
+	camera.position.set(0,0,700);
+	// ===================================================================
+	/*========================golobal variable============================*/
+	// ===================================================================
+	var group1 = new THREE.Group();;
+	var sprite;
+
+	// ===================================================================
+	/*========================create particles============================*/
+	// ===================================================================
+	var geom = new THREE.RingGeometry(333,555,666);
+	var vertices = geom.vertices;
+	/*group1*/
+	function createParticles1(){
+		console.log(vertices);
+		
+		var num=100; 
+		var gap=10;
+		var material = new THREE.SpriteMaterial({
+			// map:texture,
+			color:Math.random()*0xe1fa35
+		});
+		for (var i = 0; i < vertices.length; i++) {
+			
+				sprite = new THREE.Sprite(material);
+				// sprite.position.set(i*Math.random()*10, i*Math.random()*100,i*Math.random()*10);
+				sprite.position.set(vertices[i].x, vertices[i].y, vertices[i].z);sprite
+				// sprite.material.map =getTexture();
+				// sprite.material.color =
+				sprite.position.x += Math.random()*100;
+				sprite.position.y += Math.random()*100;
+				sprite.position.z += Math.random()*100;
+				// group1.add(sprite);
+				// scene.add(group1);
+				sprite.scale.x = sprite.scale.y =4;
+				sprite.name = "group1"
+				scene.add(sprite);
+			
+		};
+			
+	}
+	createParticles1();
+
+	/*group2*/
+	function createParticles2(){
+		var geom1 = new THREE.RingGeometry(333,555,44);
+
+		console.log(vertices);
+		
+		var num=100; 
+		var gap=10;
+		var material = new THREE.SpriteMaterial({
+			// map:texture,
+			// color:"red"
+		});
+		for (var i = 0; i < vertices.length; i++) {
+			
+				sprite = new THREE.Sprite(material);
+				// sprite.position.set(i*Math.random()*10, i*Math.random()*100,i*Math.random()*10);
+				sprite.position.set(vertices[i].x, vertices[i].y, vertices[i].z);sprite
+				console.log(getTexture());
+				sprite.material.map =getTexture();
+				sprite.position.x += Math.random()*100;
+				sprite.position.y += Math.random()*100;
+				sprite.position.z += Math.random()*100;
+				var gg = new THREE.Group();
+				gg.add(sprite);
+				scene.add(group);
+				sprite.scale.x = sprite.scale.y = 5;
+				sprite.name = "group2"
+				scene.add(sprite);
+			
+		};
+			
+	}
+	// createParticles2();
+	// ===================================================================
+	var controls = new THREE.OrbitControls(camera, renderer.domElement)
+	// ===================================================================
+
+	// ===================================================================
+	/*========================groups============================*/
+	// ===================================================================	// 
+	/*group1*/
+	var group1 = [];
+	for (var i = 0; i < scene.children.length; i++) {
+		if(scene.children[i] instanceof Object && scene.children[i].name=="group1" ){
+			// console.log(scene.children[i]);
+			group1.push(scene.children[i]);
+		}
+	};
+	console.log(group1);
+
+	/*group2*/
+	// var group2 = [];
+	// for (var i = 0; i < scene.children.length; i++) {
+	// 	if(scene.children[i] instanceof Object && scene.children[i].name=="group1" ){
+	// 		// console.log(scene.children[i]);
+	// 		group2.push(scene.children[i]);
+	// 	}
+	// };
+	// console.log(group2);
+
+	// ===================================================================
+	/*========================raycaster============================*/
+	// ===================================================================	// 
+	var raycaster = new THREE.Raycaster();
+	var mouse = new THREE.Vector2();
+	window.addEventListener("click", onMouseMove);
+	var target;
+	function onMouseMove( event ) {
+		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;	
+		raycaster.setFromCamera( mouse, camera );	
+		var intersects = raycaster.intersectObjects( scene.children );
+		// intersects[0].object.material.map = getTexture();
+		// intersects[0].object.material.needsUpdate = true;
+		var id = intersects[0].object.id;
+		console.log(scene.getObjectById(id));
+		var target = scene.getObjectById(id);
+		target.material.map = getTexture();
+		// console.log(intersects[0].object.id);
+	}
+	// ===================================================================
+	// ===================================================================	
+
+	function render() {
+		// ray();
+		// function ray(){
+		// 	raycaster.setFromCamera( mouse, camera );	
+		// 	var intersects = raycaster.intersectObjects( scene.children );
+		// 	if(intersects.length>0 && intersects[0] instanceof Object){
+		// 		// intersects[0].material.color = "red";
+		// 		console.log(intersects[0]);
+		// 	}
+		// }
+		var time = Date.now()*0.0004;
+		for (var i = 0; i < group1.length; i++) {
+			// group1[i].position.x+=Math.sin(Math.random()*time+Math.PI/3);
+			// group1[i].position.y+=Math.sin(Math.random()*time+Math.PI/3);
+			var  v= Math.sin(Math.random()*10*time+400+Math.PI/6)/2;
+			group1[i].scale.x +=v;
+			group1[i].scale.y +=v;
+			group1[i].scale.z +=v;
+			
+		};
+		for (var i = 0; i < group1.length; i++) {
+			// group1[i].position.x+=Math.sin(Math.random()*time+Math.PI/3);
+			// group1[i].position.y+=Math.sin(Math.random()*time+Math.PI/3);
+			var  v= Math.sin(Math.random()*10*time+400+Math.PI/6)/2;
+			group1[i].scale.x +=v;
+			group1[i].scale.y +=v;
+			group1[i].scale.z +=v;
+			
+		};
+			
+		requestAnimationFrame( render );
+		renderer.render( scene, camera );
+	}
+	render();
+	</script>
+
+
+	</body></html>
