@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>9 planets</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    
+</head>
+<body>
+
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r74/three.min.js"></script>
+	<script src="js/orbitControls.js"></script>
+	<script src="js/Projector.js"></script>
+	<script src="js/JSONLoader.js"></script>
+
+
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+<script>
+
+// MAIN
+
+// standard global variables
+var container, scene, camera, renderer, controls;
+
+
+var planets;
+var pScale;
+var ring;
+// custom global variables
+var mesh;
+var sunParticleGeom;
+var sunParticle;
+var sprite;
+var group;
+var universe;
+var renderer;
+
+
+
+
+init();
+animate();
+
+// FUNCTIONS 		
+function init() 
+{
+
+
+	// SCENE
+	scene = new THREE.Scene();
+	scene.fog = new THREE.FogExp2( "blue", 0.000025 );
+	// CAMERA
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 70, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 200000;
+	camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+	scene.add(camera);
+	camera.position.set(-4000,300,400);
+	camera.lookAt(scene.position);	
+	
+	// RENDERER
+	
+	renderer = new THREE.WebGLRenderer({antialias:true});
+	
+	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	container = document.getElementById('ThreeJS');
+	container.appendChild(renderer.domElement);
+	
+	// EVENTS
+	
+	
+	
+	// CONTROLS
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	
+	// LIGHT
+	var light = new THREE.AmbientLight(0xfcf29b);
+	light.intensity=1;
+	light.castShadow = true;
+	light.position.set(100,250,100); 
+	scene.add(light);
+	var light1 = new THREE.PointLight(0xfcfef7);
+	light1.intensity=1.2;
+	light1.castShadow = true;
+	light1.position.set(100,250,100); 
+	scene.add(light1);
+	
+	// FLOOR
+	
+	var skyBoxGeometry = new THREE.CubeGeometry(100000, 100000, 100000);
+	// var skyBoxMaterial = new THREE.MeshBasicMaterial({color:"0x9999ff", side:THREE.BackSide});
+	var skyBoxMaterial = new THREE.MeshBasicMaterial({color:"black", side:THREE.BackSide});
+	var skyBox = new THREE.Mesh(skyBoxGeometry, skyBoxMaterial);
+	scene.add(skyBox);
+	
+	////////////
+	// CUSTOM //
+	////////////
+
+	/*texture*/
+	var planetsTexture = {
+		sun : new THREE.TextureLoader().load('images/sun.jpg'),
+		mercury: new THREE.TextureLoader().load('images/mercury.jpg'),
+		venus: new THREE.TextureLoader().load('images/venus.jpg'),
+		earth: new THREE.TextureLoader().load('images/earth.jpg'),
+		mars: new THREE.TextureLoader().load('images/mars.jpg'),
+		jupiter: new THREE.TextureLoader().load('images/jupiter.jpg'),
+		saturn: new THREE.TextureLoader().load('images/saturn.png'),
+		uranus: new THREE.TextureLoader().load('images/uranus.jpg'),
+		neptune: new THREE.TextureLoader().load('images/neptune.jpg'),
+		pluto: new THREE.TextureLoader().load('images/pluto.jpg')
+	}
+
+	var otherTexture = {
+		ring:  new THREE.TextureLoader().load('images/ring.png'),
+		moon :  new THREE.TextureLoader().load('images/moon.jpg'),
+		universe :  new THREE.TextureLoader().load('images/universe.jpg')
+	} 
+
+	var geometry = new THREE.SphereGeometry(10000, 32, 16);
+	var material = new THREE.MeshLambertMaterial({
+		map:otherTexture.universe,
+		side:THREE.DoubleSide,
+		reflectivity: 0.4,
+		fog: "red"
+		});
+	universe = new THREE.Mesh(geometry, material);
+	universe.position.set(0,40,0);
+	scene.add(universe);
+
+	var p = ["sun","mercury","venus","earth","mars","jupiter","saturn","uranus","neptune","pluto"];
+	pScale = [28,1,4,5,2,10,8,7,3,4,1]
+	planets = {};
+	for (var i = 0; i < p.length; i++) {
+
+		var geometry = new THREE.SphereGeometry(30*pScale[i], 100, 111);
+		var material = new THREE.MeshLambertMaterial({map:planetsTexture[p[i]], side:THREE.DoubleSide});
+		mesh = new THREE.Mesh(geometry, material);
+		geometry.applyMatrix(new THREE.Matrix4().makeTranslation(i*800,0,0)); // anchors the center, moves the sphere
+		var a = Math.random()*22;
+
+		mesh.rotation.y = i*(a);
+		mesh.name = p[i];
+		planets[p[i]] = mesh;
+		// console.log(planets[p[i]]);
+		scene.add(mesh);
+		if(p[i] == "saturn"){
+			console.log(a);
+			var gemo = new THREE.RingGeometry(450, 300, 80, 44, 10);
+			gemo.faces[0].a=0;
+			gemo.faces[0].b=0;
+			gemo.faces[0].c=0;
+			console.log(mesh.matrixWorld);
+			var material = new THREE.MeshBasicMaterial( { 
+				map: otherTexture.ring,
+				side: THREE.DoubleSide,
+				wireframe: true,
+				wireframeLinewidth: 2,
+				wireframeLinecap: "round",
+				wireframeLinejoin: "round",
+			} );
+			
+			gemo.applyMatrix(new THREE.Matrix4().makeTranslation(i*800,0,0)); // anchors the center, moves the sphere
+
+			ring = new THREE.Mesh( gemo, material );
+			ring.rotation.y = i*(a);
+			// ring.rotation.z = 1;
+
+			scene.add( ring );
+		}
+	};
+	var moon;
+	createMoon();
+	function createMoon(){
+		var geometry = new THREE.SphereGeometry(40, 32, 16);
+		var material = new THREE.MeshLambertMaterial({map:otherTexture.moon, side:THREE.DoubleSide});
+		mesh = new THREE.Mesh(geometry, material);
+		// mesh.position.set(3200,0,0)
+
+		
+		// geometry.applyMatrix(new THREE.Matrix4().makeTranslation(planets.earth)); // anchors the center, moves the sphere
+		
+		mesh.name = "moon";
+		moon = mesh;
+		scene.add(mesh);
+	}
+	/*sun particle*/
+	var position = planets.sun.geometry.vertices;
+
+
+	function createParticles(){
+		
+		var vertices = position;
+		
+
+		var material = new THREE.SpriteMaterial({
+			size:10,
+			map: planetsTexture.sun,
+			// color:Math.random()*0xe1fa35
+		});
+
+		
+			for (var i = 0; i < vertices.length; i++) {
+				
+					sprite = new THREE.Sprite(material);
+					// sprite.position.set(i*Math.random()*10, i*Math.random()*100,i*Math.random()*10);
+					sprite.position.set(vertices[i].x, vertices[i].y, vertices[i].z);sprite
+
+					sprite.position.x += Math.random()*100;
+					sprite.position.y += Math.random()*100;
+					sprite.position.z += Math.random()*100;
+
+					sprite.scale.x = sprite.scale.y =Math.random()*10;
+					sprite.name = "group"
+					scene.add(sprite);
+				
+			};
+			for (var i = 0; i < vertices.length; i++) {
+				
+					sprite = new THREE.Sprite(material);
+					// sprite.position.set(i*Math.random()*10, i*Math.random()*100,i*Math.random()*10);
+					sprite.position.set(vertices[i].x, vertices[i].y, vertices[i].z);sprite
+
+					sprite.position.x += Math.random()*55;
+					sprite.position.y += Math.random()*55;
+					sprite.position.z += Math.random()*55;
+
+					sprite.scale.x = sprite.scale.y =Math.random()*10;
+					sprite.name = "group"
+					scene.add(sprite);
+				
+			};
+
+
+			
+			console.log(sprite);
+	}
+	createParticles();
+	group = [];
+	for (var i = 0; i < scene.children.length; i++) {
+		if(scene.children[i] instanceof Object && scene.children[i].name=="group" ){
+			// console.log(scene.children[i]);
+			group.push(scene.children[i]);
+		}
+	};
+	console.log(group);
+
+}
+
+
+function animate() {
+	var time = Date.now()*0.0004;
+	
+	for(prop in planets){
+		// console.log(planets[prop]);	
+
+		if(prop!= "sun" && prop!= "saturn" ){
+			
+			planets[prop].rotation.y += 0.006;
+		}
+		if(prop = "saturn"){
+			ring.rotation.y += 0.0001;
+			planets[prop].rotation.y += 0.0001;
+		}
+	}
+	for (var i = 0; i < group.length; i++) {
+		var  v= 10*Math.sin(Math.random()*10*time+Math.PI/6);
+		group[i].position.x += Math.random()*v;
+		group[i].position.y += Math.random()*v;
+		group[i].position.z += Math.random()*v;
+	};
+
+
+
+					
+
+	// universe.rotation.x += 0.001;
+	// universe.rotation.z += 0.001;
+    requestAnimationFrame(animate);
+	
+
+	controls.update();
+	renderer.render(scene,camera);
+}
+
+
+</script>
+
+</body>
+</html>
